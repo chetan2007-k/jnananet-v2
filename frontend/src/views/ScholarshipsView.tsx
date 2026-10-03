@@ -333,11 +333,11 @@ export const ScholarshipsView: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
-                  s.matchScore >= 85 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                  s.matchScore >= 75 ? 'bg-brand-500/10 text-brand-400 border-brand-500/20' :
+                  (s.matchScore || 0) >= 85 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                  (s.matchScore || 0) >= 75 ? 'bg-brand-500/10 text-brand-400 border-brand-500/20' :
                   'bg-amber-500/10 text-amber-400 border-amber-500/20'
                 }`}>
-                  {s.matchScore}% Match
+                  {s.matchScore || 0}% Match
                 </span>
                 <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-white/50 px-2 py-1 rounded-md">{s.category}</span>
               </div>

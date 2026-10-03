@@ -82,7 +82,7 @@ export const Navbar: React.FC = () => {
 
           {/* Profile Avatar Badge */}
           <button
-            onClick={() => setActiveTab("profile")}
+            onClick={() => setActiveTab("identity")}
             className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm hover:border-brand-300 transition"
           >
             <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">

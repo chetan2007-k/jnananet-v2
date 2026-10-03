@@ -5,7 +5,6 @@ import { Sidebar } from "./components/Sidebar";
 
 import { DashboardView } from "./views/DashboardView";
 import { ScholarshipsView } from "./views/ScholarshipsView";
-import { ComparisonView } from "./views/ComparisonView";
 import { WhatIfSimulatorView } from "./views/WhatIfSimulatorView";
 import { AiAssistantView } from "./views/AiAssistantView";
 import { MyApplicationsView } from "./views/MyApplicationsView";
