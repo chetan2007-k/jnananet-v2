@@ -2,6 +2,7 @@ import React from "react";
 import { useAppStore } from "./store/useAppStore";
 import { Navbar } from "./components/Navbar";
 import { Sidebar } from "./components/Sidebar";
+import { WelcomeModal } from "./components/WelcomeModal";
 
 import { DashboardView } from "./views/DashboardView";
 import { ScholarshipsView } from "./views/ScholarshipsView";
@@ -37,6 +38,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-slate-50 text-slate-900 ">
+      <WelcomeModal />
       {/* Sidebar Navigation */}
       <Sidebar />
 
