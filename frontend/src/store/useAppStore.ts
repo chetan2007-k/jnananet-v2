@@ -49,7 +49,7 @@ export const useAppStore = create<AppState>((set) => ({
     phone: "",
     dateOfBirth: "",
     gender: "",
-    category: "",
+    category: "GENERAL",
     state: "",
     district: "",
     pincode: "",
