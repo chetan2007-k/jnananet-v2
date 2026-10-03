@@ -10,11 +10,11 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { profile, updateProfile } = useAppStore();
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("student.demo@jnananet.in");
-  const [password, setPassword] = useState("Password123");
-  const [fullName, setFullName] = useState("Aarav Chenna");
-  const [state, setState] = useState("Tamil Nadu");
-  const [district, setDistrict] = useState("Chennai");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
