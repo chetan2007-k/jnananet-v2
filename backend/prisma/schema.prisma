@@ -1,0 +1,319 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  REVIEWER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum Category {
+  GENERAL
+  OBC
+  SC
+  ST
+  EWS
+}
+
+enum GradeType {
+  PERCENTAGE
+  CGPA
+}
+
+enum DocumentType {
+  AADHAAR
+  INCOME_CERT
+  MARKSHEET
+  BONAFIDE
+  CASTE_CERT
+  BANK_PASSBOOK
+  DISABILITY_CERT
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum MatchTag {
+  HIGH_PROBABILITY
+  STRONG_MATCH
+  MODERATE_MATCH
+  STRETCH
+  INELIGIBLE
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  passwordHash    String           @map("password_hash")
+  role            Role             @default(STUDENT)
+  isVerified      Boolean          @default(false) @map("is_verified")
+  status          String           @default("ACTIVE")
+  lastLoginAt     DateTime?        @map("last_login_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  profile         StudentProfile?
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  aiAnalyses      AIAnalysis[]
+
+  @@map("users")
+}
+
+model StudentProfile {
+  id                   String            @id @default(uuid())
+  userId               String            @unique @map("user_id")
+  fullName             String            @map("full_name")
+  phone                String?
+  dateOfBirth          DateTime?         @map("date_of_birth")
+  gender               Gender?           @default(PREFER_NOT_TO_SAY)
+  category             Category          @default(GENERAL)
+  state                String
+  district             String
+  pincode              String?
+  isDifferentlyAbled   Boolean           @default(false) @map("is_differently_abled")
+  disabilityPercentage Float?            @map("disability_percentage")
+  singleGirlChild      Boolean           @default(false) @map("single_girl_child")
+  profilePhotoUrl      String?           @map("profile_photo_url")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  academicRecord       AcademicRecord?
+  financialProfile     FinancialProfile?
+  documents            StudentDocument[]
+  matches              ScholarshipMatch[]
+  applications         Application[]
+
+  @@index([state, category])
+  @@map("student_profiles")
+}
+
+model AcademicRecord {
+  id                String         @id @default(uuid())
+  studentProfileId  String         @unique @map("student_profile_id")
+  currentLevel      String         @map("current_level")
+  courseName        String         @map("course_name")
+  specialization    String?
+  institutionName   String         @map("institution_name")
+  boardOrUniversity String         @map("board_or_university")
+  yearOfStudy       Int            @default(1) @map("year_of_study")
+  gradeType         GradeType      @default(PERCENTAGE) @map("grade_type")
+  scoreObtained     Float          @map("score_obtained")
+  maxScore          Float          @default(100.0) @map("max_score")
+  tenthPercentage   Float?         @map("tenth_percentage")
+  twelfthPercentage Float?         @map("twelfth_percentage")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@index([courseName, scoreObtained])
+  @@map("academic_records")
+}
+
+model FinancialProfile {
+  id                       String         @id @default(uuid())
+  studentProfileId         String         @unique @map("student_profile_id")
+  annualFamilyIncome       Float          @map("annual_family_income")
+  fatherOccupation         String?        @map("father_occupation")
+  motherOccupation         String?        @map("mother_occupation")
+  hasIncomeCertificate     Boolean        @default(false) @map("has_income_certificate")
+  incomeCertificateNumber  String?        @map("income_certificate_number")
+  incomeCertificateIssuer  String?        @map("income_certificate_issuer")
+  certificateIssuedDate    DateTime?      @map("certificate_issued_date")
+  createdAt                DateTime       @default(now()) @map("created_at")
+  updatedAt                DateTime       @updatedAt @map("updated_at")
+
+  studentProfile           StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@index([annualFamilyIncome])
+  @@map("financial_profiles")
+}
+
+model Scholarship {
+  id             String                @id @default(uuid())
+  title          String
+  slug           String                @unique
+  provider       String
+  category       String
+  description    String
+  awardAmount    Float                 @map("award_amount")
+  awardDetails   String?               @map("award_details")
+  officialUrl    String                @map("official_url")
+  isActive       Boolean               @default(true) @map("is_active")
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
+
+  criteria       ScholarshipCriteria[]
+  deadlines      ScholarshipDeadline[]
+  matches        ScholarshipMatch[]
+  applications   Application[]
+
+  @@index([isActive])
+  @@map("scholarships")
+}
+
+model ScholarshipCriteria {
+  id                String      @id @default(uuid())
+  scholarshipId     String      @map("scholarship_id")
+  minAcademicScore  Float       @default(0.0) @map("min_academic_score")
+  maxFamilyIncome   Float       @default(999999999.0) @map("max_family_income")
+  allowedCourses    Json        @map("allowed_courses")
+  allowedStates     Json        @map("allowed_states")
+  allowedCategories Json        @map("allowed_categories")
+  genderRestriction String      @default("ALL") @map("gender_restriction")
+  disabilityRequired Boolean    @default(false) @map("disability_required")
+  customRules       Json?       @map("custom_rules")
+  createdAt         DateTime    @default(now()) @map("created_at")
+
+  scholarship       Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@index([scholarshipId])
+  @@map("scholarship_criteria")
+}
+
+model ScholarshipDeadline {
+  id             String      @id @default(uuid())
+  scholarshipId  String      @map("scholarship_id")
+  academicYear   String      @map("academic_year")
+  startDate      DateTime    @map("start_date")
+  endDate        DateTime    @map("end_date")
+  extensionDate  DateTime?   @map("extension_date")
+  isExtended     Boolean     @default(false) @map("is_extended")
+  status         String      @default("UPCOMING")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  scholarship    Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@index([endDate, status])
+  @@map("scholarship_deadlines")
+}
+
+model StudentDocument {
+  id                 String             @id @default(uuid())
+  studentProfileId   String             @map("student_profile_id")
+  documentType       DocumentType       @map("document_type")
+  fileName           String             @map("file_name")
+  fileSize           Int                @map("file_size")
+  mimeType           String             @map("mime_type")
+  s3Key              String             @map("s3_key")
+  s3Bucket           String             @map("s3_bucket")
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  ocrExtractedData   Json?              @map("ocr_extracted_data")
+  uploadedAt         DateTime           @default(now()) @map("uploaded_at")
+
+  studentProfile     StudentProfile     @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@index([studentProfileId, documentType])
+  @@map("student_documents")
+}
+
+model ScholarshipMatch {
+  id                      String         @id @default(uuid())
+  studentProfileId        String         @map("student_profile_id")
+  scholarshipId           String         @map("scholarship_id")
+  isDeterministicEligible Boolean        @map("is_deterministic_eligible")
+  matchScore              Int            @map("match_score")
+  passedRules             Json           @map("passed_rules")
+  failedRules             Json           @map("failed_rules")
+  aiRecommendationTag     MatchTag?      @map("ai_recommendation_tag")
+  aiReasoning             String?        @map("ai_reasoning")
+  calculatedAt            DateTime       @default(now()) @map("calculated_at")
+
+  studentProfile          StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  scholarship             Scholarship    @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@unique([studentProfileId, scholarshipId])
+  @@index([studentProfileId, matchScore])
+  @@map("scholarship_matches")
+}
+
+model Application {
+  id               String            @id @default(uuid())
+  studentProfileId String            @map("student_profile_id")
+  scholarshipId    String            @map("scholarship_id")
+  status           ApplicationStatus @default(DRAFT)
+  readinessScore   Int               @default(0) @map("readiness_score")
+  submittedAt      DateTime?         @map("submitted_at")
+  notes            String?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  studentProfile   StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  scholarship      Scholarship       @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@unique([studentProfileId, scholarshipId])
+  @@index([studentProfileId, status])
+  @@map("applications")
+}
+
+model AIAnalysis {
+  id             String   @id @default(uuid())
+  userId         String?  @map("user_id")
+  analysisType   String   @map("analysis_type")
+  modelId        String   @map("model_id")
+  promptSummary  String?  @map("prompt_summary")
+  rawResponse    Json     @map("raw_response")
+  tokenCount     Int?     @map("token_count")
+  latencyMs      Int?     @map("latency_ms")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([analysisType, createdAt])
+  @@map("ai_analysis")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String
+  message   String
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  action    String
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  details   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
