@@ -70,8 +70,21 @@ export const App: React.FC = () => {
         </main>
       </div>
 
+      {/* Floating AI Helper Button */}
+      <button 
+        onClick={() => useAppStore.getState().setActiveTab("assistant")}
+        className="fixed bottom-20 right-4 lg:bottom-8 lg:right-8 z-50 p-4 bg-slate-900 text-white rounded-full shadow-2xl hover:shadow-brand-500/25 hover:-translate-y-1 transition-all duration-300 group hidden sm:flex items-center gap-0 hover:gap-3"
+      >
+        <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 ease-in-out text-sm font-bold">
+          Ask AI Assistant
+        </span>
+      </button>
+
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-slate-200/80 px-2 py-2 flex items-center justify-around z-50 bg-white/90 backdrop-blur-md pb-safe">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-slate-200/80 px-2 py-2 flex items-center justify-around z-[60] bg-white/90 backdrop-blur-md pb-safe">
         <button onClick={() => useAppStore.getState().setActiveTab("dashboard")} className={`flex flex-col items-center p-2 rounded-lg ${activeTab === 'dashboard' ? 'text-brand-600' : 'text-slate-400'}`}>
           <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
           <span className="text-[10px] font-bold">Home</span>

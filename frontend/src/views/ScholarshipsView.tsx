@@ -13,6 +13,7 @@ import {
   BookOpen,
   Building2,
 } from "lucide-react";
+import confetti from "canvas-confetti";
 
 export const ScholarshipsView: React.FC = () => {
   const {
@@ -38,12 +39,21 @@ export const ScholarshipsView: React.FC = () => {
       setMagicProgress(prog);
       if (prog >= 100) {
         clearInterval(interval);
+        
+        // Fire Confetti!
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#4f46e5', '#3b82f6', '#10b981', '#f59e0b']
+        });
+
         setTimeout(() => {
           if (selectedScholarship?.officialUrl) {
             window.open(selectedScholarship.officialUrl, "_blank");
           }
           setIsMagicApplyOpen(false);
-        }, 1000);
+        }, 1500);
       }
     }, 600);
   };
