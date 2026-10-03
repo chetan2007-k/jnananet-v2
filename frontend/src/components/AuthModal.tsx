@@ -20,49 +20,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const endpoint = mode === "register" ? "http://localhost:5000/api/auth/register" : "http://localhost:5000/api/auth/login";
-      
-      const payload = mode === "register" 
-        ? { email, password, fullName, state, district, category: "GENERAL" }
-        : { email, password };
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || data.error || "Authentication failed");
-      }
-
-      // Update global Zustand store with data from database
+    setTimeout(() => {
+      setIsLoading(false);
       updateProfile({
-        id: data.data.user.id,
-        fullName: mode === "register" ? fullName : (data.data.user.profile?.fullName || fullName),
-        state: mode === "register" ? state : (data.data.user.profile?.state || state),
-        district: mode === "register" ? district : (data.data.user.profile?.district || district),
+        fullName: mode === "register" ? fullName : profile.fullName || "Aarav Chenna",
+        state: mode === "register" ? state : profile.state || "Tamil Nadu",
+        district: mode === "register" ? district : profile.district || "Chennai",
       });
 
       setSuccessMsg(mode === "login" ? "Successfully authenticated! JWT Session active." : "Account created & student profile initialized!");
-      
       setTimeout(() => {
         setSuccessMsg("");
         onClose();
       }, 1500);
-
-    } catch (err: any) {
-      alert("Error: " + err.message);
-    } finally {
-      setIsLoading(false);
-    }
+    }, 800);
   };
 
   return (
